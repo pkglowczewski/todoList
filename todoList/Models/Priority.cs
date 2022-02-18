@@ -8,7 +8,6 @@ namespace todoList.Models
         public int PriorityId { get; set; }
         [Display(Name = "Priorytet")]
         public string Name { get; set; }
-        public string Color { get; set; }
 
     }
 }
