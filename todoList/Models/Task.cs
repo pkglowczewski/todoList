@@ -26,5 +26,7 @@ namespace todoList.Models
         public int PriorityId { get; set; }
         [Display(Name = "Priorytet")]
         public Priority Priority { get; set; }
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }
