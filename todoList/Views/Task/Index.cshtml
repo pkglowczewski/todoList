@@ -1,7 +1,125 @@
-﻿
+﻿@model todoList.Models.TaskPriorityViewModel
+
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Lista zadań";
 }
 
-<h1>Index</h1>
-
+<h1>Lista zadań: @Model.Date</h1>
+<hr />
+<form asp-action="PickDate">
+            <div class="form-group">
+                 <label asp-for="DatePick" class="control-label"></label>
+                <input asp-for="DatePick" type="date" asp-format="{0:dd-MM-yyyy}" value="@DateTime.Today.ToString("dd.MM.yyyy")" class="form-control" />
+                <span asp-validation-for="DatePick" class="text-danger"></span>
+            </div>
+            <div class="form-group justify-content-end">
+                <input type="submit" value="Wybierz" class="btn btn-primary mt-1" />
+            </div>
+</form>
+<hr />
+<div class="table-responsive">
+<table class="table table-bordered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th class="col-md-2">
+                @Html.DisplayNameFor(model => model.Task.Name)
+            </th>
+            <th class="col-md-8">
+                @Html.DisplayNameFor(model => model.Task.Description)
+            </th>
+            <th class="col-md-1">
+                @Html.DisplayNameFor(model => model.Task.DateTime)
+            </th>
+            <th class="col-md-1">
+                @Html.DisplayNameFor(model => model.Task.Priority)
+            </th>
+            <th class="col-md-1">
+                @Html.DisplayNameFor(model => model.Task.isDone)
+            </th>
+            <th class="col-md-1">
+               @Html.DisplayName("Operacje")
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Tasks.Where(e=>e.isDone == false)) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateTime)
+            </td>
+            <td style="text-align:center; vertical-align: middle;">
+                @Html.DisplayFor(modelItem => item.Priority.Name)
+            </td>
+            <td>
+            </td>
+            <td style="text-align:center; vertical-align: middle;">
+                <a asp-action="Edit" asp-route-id="@item.TaskId"><i class="fa-solid fa-pen"></i></a> |
+                <a asp-action="Delete" asp-route-id="@item.TaskId"><i class="fa-solid fa-trash-can"></i></a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</div>
+<hr />
+<h3>Zadania wykonane</h3>
+<div class="table-responsive">
+<table class="table table-bordered table-hover">
+    <thead class="thead-dark">
+       <tr>
+            <th class="col-md-2">
+                @Html.DisplayNameFor(model => model.Task.Name)
+            </th>
+            <th class="col-md-8">
+                @Html.DisplayNameFor(model => model.Task.Description)
+            </th>
+            <th class="col-md-1">
+                @Html.DisplayNameFor(model => model.Task.DateTime)
+            </th>
+            <th class="col-md-1">
+                @Html.DisplayNameFor(model => model.Task.Priority)
+            </th>
+            <th class="col-md-1">
+                @Html.DisplayNameFor(model => model.Task.isDone)
+            </th>
+            <th class="col-md-1">
+               @Html.DisplayName("Operacje")
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Tasks.Where(e=>e.isDone == true)) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateTime)
+            </td>
+            <td style="text-align:center; vertical-align: middle;">
+                @Html.DisplayFor(modelItem => item.Priority.Name)
+            </td>
+            <td style="background-color:@(item.isDone == true ? "lightgreen" : "");text-align:center; vertical-align: middle;">
+                    @if(item.isDone == true)
+                    {
+                    <i class="fa-solid fa-circle-check"></i>      
+                    }
+            </td>
+           <td style="text-align:center; vertical-align: middle;">
+                <a asp-action="Edit" asp-route-id="@item.TaskId"><i class="fa-solid fa-pen"></i></a> |
+                <a asp-action="Delete" asp-route-id="@item.TaskId"><i class="fa-solid fa-trash-can"></i></a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</div>

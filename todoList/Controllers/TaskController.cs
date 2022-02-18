@@ -1,16 +1,51 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using todoList.Data;
+using todoList.Models;
 
 namespace todoList.Controllers
 {
+    [Authorize]
     public class TaskController : Controller
     {
-        // GET: TaskController
-        public ActionResult Index()
-        {
-            return View();
-        }
+        private readonly ApplicationDbContext _db;
 
+        public TaskController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+        // GET: TaskController
+        public ActionResult Index(DateTime date)
+        {
+            if (date.ToString("dd.MM.yyyy") == DateTime.MinValue.Date.ToString("dd.MM.yyyy"))
+            {
+                date = DateTime.Today;
+            }
+            date = date.Date;
+            DateTime thisDay24 = date.AddDays(1);
+
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var tasksList = _db.Tasks.Where(x => x.UserId == userId && x.DateTime > date && x.DateTime < thisDay24).OrderBy(x => x.DateTime).ToList();
+
+            var priorityList = _db.Priorities.ToList();
+
+            var dateForIndex = date.ToString("dddd, dd MMMM yyyy");
+
+            var vm = new TaskPriorityViewModel();
+            vm.Priorities = priorityList;
+            vm.Tasks = tasksList;
+            vm.Date = dateForIndex;
+
+            return View(vm);
+        }
+        public ActionResult PickDate(DateTime datePick)
+        {
+
+            return RedirectToAction("Index", new { date = datePick });
+        }
         // GET: TaskController/Details/5
         public ActionResult Details(int id)
         {
@@ -20,23 +55,35 @@ namespace todoList.Controllers
         // GET: TaskController/Create
         public ActionResult Create()
         {
-            return View();
+            var vm = new TaskPriorityViewModel();
+            vm.Priorities = _db.Priorities.ToList();
+            return View(vm);
         }
-
         // POST: TaskController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Models.Task task, TaskPriorityViewModel model)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                    task.Name = model.Task.Name;
+                    task.Description = model.Task.Description;
+                    task.DateTime = model.Task.DateTime;
+                    task.PriorityId = model.Task.PriorityId;
+                    task.UserId = userId;
+
+                    _db.Tasks.Add(task);
+                    _db.SaveChanges();
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    throw;
+                }
             }
-            catch
-            {
-                return View();
-            }
-        }
 
         // GET: TaskController/Edit/5
         public ActionResult Edit(int id)
