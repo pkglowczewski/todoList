@@ -1,8 +1,17 @@
-﻿@{
+﻿@model todoList.Models.TaskPriorityViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>Najbliższe zadania</h1>
+@foreach (var item in Model.Tasks) {
+    <a style="text-decoration:none;" href="@Url.Action("Edit", "UserTask", new { id = item.TaskId })">
+    <div class="alert @(item.PriorityId == 1 ? "alert-danger" : "alert-warning")" role="alert")">
+    @Html.DisplayFor(modelItem => item.Name) |
+    @Html.DisplayFor(modelItem => item.Description) |
+    @Html.DisplayFor(modelItem => item.DateTime) |
+    @Html.DisplayFor(modelItem => item.Priority.Name)
+    </div>
+    </a>
+            
+}
