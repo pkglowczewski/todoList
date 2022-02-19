@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using todoList.Data;
 using todoList.Models;
@@ -77,8 +78,8 @@ namespace todoList.Controllers
                     _db.Tasks.Add(task);
                     _db.SaveChanges();
 
-                    return RedirectToAction(nameof(Index));
-                }
+                    return RedirectToAction("Index", new { date = task.DateTime });
+            }
                 catch
                 {
                     throw;
@@ -88,28 +89,59 @@ namespace todoList.Controllers
         // GET: TaskController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            if (id == null)
+            {
+                return HttpNotFound();
+            }
+            Models.Task task = _db.Tasks.Find(id);
+            var priorityList = _db.Priorities.ToList();
+            var vm = new TaskPriorityViewModel();
+            vm.Task = task;
+            vm.Priorities = priorityList;
+            if (task == null)
+            {
+                return HttpNotFound();
+            }
+            return View(vm);
         }
+
+        private ActionResult HttpNotFound()
+        {
+            throw new NotImplementedException();
+        }
+    
 
         // POST: TaskController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(TaskPriorityViewModel model)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var vm = model.Task;
+            vm.UserId = userId;
+            _db.Entry(vm).State = EntityState.Modified;
+            _db.SaveChanges();
+
+            return RedirectToAction("Index", new { date = vm.DateTime });
         }
 
         // GET: TaskController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            if (id == null)
+            {
+                return HttpNotFound();
+            }
+            Models.Task task = _db.Tasks.Find(id);
+            var priority = _db.Priorities.Find(task.PriorityId);
+            var vm = new TaskPriorityViewModel();
+            vm.Task = task;
+            vm.Priority = priority;
+            if (task == null)
+            {
+                return HttpNotFound();
+            }
+            return View(vm);
         }
 
         // POST: TaskController/Delete/5
@@ -119,7 +151,10 @@ namespace todoList.Controllers
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                Models.Task task = _db.Tasks.Find(id);
+                _db.Tasks.Remove(task);
+                _db.SaveChanges();
+                return RedirectToAction("Index", new { date = task.DateTime });
             }
             catch
             {

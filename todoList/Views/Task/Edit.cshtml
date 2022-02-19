@@ -1,0 +1,45 @@
+﻿@model todoList.Models.TaskPriorityViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edytuj zadanie: @Model.Task.Name </h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Task.TaskId" />
+            <input type="hidden" asp-for="Task.TaskId" />
+            <div class="form-group">
+                <label asp-for="Task.Name" class="control-label"></label>
+                <input asp-for="Task.Name" class="form-control" />
+                <span asp-validation-for="Task.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Task.Description" class="control-label"></label>
+                <input asp-for="Task.Description" class="form-control" />
+                <span asp-validation-for="Task.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Task.DateTime" class="control-label"></label>
+                <input asp-for="Task.DateTime" class="form-control" />
+                <span asp-validation-for="Task.DateTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                 <label asp-for="Task.PriorityId" class="control-label"></label>
+                 <select class="form-control" asp-for="Task.PriorityId" 
+                    asp-items="@(new SelectList(Model.Priorities, nameof(Priority.PriorityId), nameof(Priority.Name)))">
+                </select>
+            </div>
+            <div>
+                <input type="checkbox" asp-for="Task.isDone"  />
+                <label asp-for="Task.isDone">Zakończone</label>
+            </div>
+            <div class="form-group mt-1">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
