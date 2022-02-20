@@ -2,15 +2,21 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-
+@if(Model.Tasks.Count < 1)
+{
+   <h1>Brak zadań</h1>
+}
+else{
 <h1>Najbliższe zadania</h1>
-@foreach (var item in Model.Tasks) {
-    <a style="text-decoration:none;" href="@Url.Action("Edit", "UserTask", new { id = item.TaskId })">
+}
+
+@foreach (var item in Model.Tasks.Where(x=>x.isDone != true).ToList()) {
+    <a style="text-decoration:none;" href="@Url.Action("Edit", "Task", new { id = item.TaskId })">
     <div class="alert @(item.PriorityId == 1 ? "alert-danger" : "alert-warning")" role="alert")">
     @Html.DisplayFor(modelItem => item.Name) |
     @Html.DisplayFor(modelItem => item.Description) |
     @Html.DisplayFor(modelItem => item.DateTime) |
-    @Html.DisplayFor(modelItem => item.Priority.Name)
+    Priorytet: @Html.DisplayFor(modelItem => item.Priority.Name)
     </div>
     </a>
             
