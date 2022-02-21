@@ -68,22 +68,17 @@ namespace todoList.Controllers
         // POST: TaskController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Models.Task task, TaskPriorityViewModel model)
+        public ActionResult Create(TaskPriorityViewModel model)
         {
                 try
                 {
                     var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                    task.Name = model.Task.Name;
-                    task.Description = model.Task.Description;
-                    task.DateTime = model.Task.DateTime;
-                    task.PriorityId = model.Task.PriorityId;
-                    task.UserId = userId;
-
-                    _db.Tasks.Add(task);
+                    model.Task.UserId = userId;
+                    _db.Tasks.Add(model.Task);
                     _db.SaveChanges();
 
-                    return RedirectToAction("Index", new { date = task.DateTime.Date });
+                    return RedirectToAction("Index", new { date = model.Task.DateTime.Date });
             }
                 catch
                 {
