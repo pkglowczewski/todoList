@@ -20,10 +20,10 @@ namespace todoList.Controllers
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
             var tasksList = new List<Models.Task>();
             var priorityList = _db.Priorities.ToList();
-            DateTime date = DateTime.Now;
             foreach (var priority in priorityList)
             {
-                var items = _db.Tasks.Where(e => e.UserId == userId && e.PriorityId == priority.PriorityId && e.DateTime > date)
+                var items = _db.Tasks
+                    .Where(e => e.UserId == userId && e.PriorityId == priority.PriorityId && e.DateTime > DateTime.Now)
                     .OrderBy(e => e.DateTime).Take(3).ToList();
 
                 tasksList.AddRange(items);

@@ -18,23 +18,23 @@ namespace todoList.Controllers
             _db = db;
         }
         // GET: TaskController
-        public ActionResult Index(DateTime date)
+        public ActionResult Index(DateTime? date)
         {
-            if (date.ToString("dd.MM.yyyy") == DateTime.MinValue.Date.ToString("dd.MM.yyyy"))
+            if (!date.HasValue || date.Value.Day == DateTime.MinValue.Day)
             {
                 date = DateTime.Today;
             }
 
-            DateTime dateAddDay = date.AddDays(1);
+            DateTime dateAddDay = date.Value.AddDays(1);
 
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var tasksList = _db.Tasks.Where(x => x.UserId == userId && x.DateTime > date && x.DateTime < dateAddDay)
+            var tasksList = _db.Tasks.Where(x => x.UserId == userId && x.DateTime.Day == date.Value.Date.Day)
                 .OrderBy(x => x.DateTime).ToList();
 
             var priorityList = _db.Priorities.ToList();
 
-            var dateForIndex = date.ToString("dddd, dd MMMM yyyy");
+            var dateForIndex = date.Value.ToString("dddd, dd MMMM yyyy");
 
             var vm = new TaskPriorityViewModel()
             {
@@ -49,11 +49,6 @@ namespace todoList.Controllers
         {
 
             return RedirectToAction("Index", new { date = datePick.Date });
-        }
-        // GET: TaskController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
         }
 
         // GET: TaskController/Create
@@ -85,12 +80,8 @@ namespace todoList.Controllers
         }
 
         // GET: TaskController/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
             Models.Task? task = _db.Tasks.FirstOrDefault(x => x.TaskId == id);
             if (task == null)
             {
@@ -123,12 +114,8 @@ namespace todoList.Controllers
         }
 
         // GET: TaskController/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
             Models.Task? task = _db.Tasks.FirstOrDefault(x => x.TaskId == id);
             if (task == null)
             {
