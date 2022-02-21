@@ -24,28 +24,31 @@ namespace todoList.Controllers
             {
                 date = DateTime.Today;
             }
-            date = date.Date;
-            DateTime thisDay24 = date.AddDays(1);
+           
+            DateTime dateAddDay = date.AddDays(1);
 
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var tasksList = _db.Tasks.Where(x => x.UserId == userId && x.DateTime > date && x.DateTime < thisDay24).OrderBy(x => x.DateTime).ToList();
+            var tasksList = _db.Tasks.Where(x => x.UserId == userId && x.DateTime > date && x.DateTime < dateAddDay)
+                .OrderBy(x => x.DateTime).ToList();
 
             var priorityList = _db.Priorities.ToList();
 
             var dateForIndex = date.ToString("dddd, dd MMMM yyyy");
 
-            var vm = new TaskPriorityViewModel();
-            vm.Priorities = priorityList;
-            vm.Tasks = tasksList;
-            vm.Date = dateForIndex;
+            var vm = new TaskPriorityViewModel()
+            {
+                Priorities = priorityList,
+                Tasks = tasksList,
+                Date = dateForIndex
+            };
 
             return View(vm);
         }
         public ActionResult PickDate(DateTime datePick)
         {
 
-            return RedirectToAction("Index", new { date = datePick });
+            return RedirectToAction("Index", new { date = datePick.Date });
         }
         // GET: TaskController/Details/5
         public ActionResult Details(int id)
@@ -56,8 +59,10 @@ namespace todoList.Controllers
         // GET: TaskController/Create
         public ActionResult Create()
         {
-            var vm = new TaskPriorityViewModel();
-            vm.Priorities = _db.Priorities.ToList();
+            var vm = new TaskPriorityViewModel()
+            {
+                Priorities = _db.Priorities.ToList()
+            };
             return View(vm);
         }
         // POST: TaskController/Create
@@ -78,7 +83,7 @@ namespace todoList.Controllers
                     _db.Tasks.Add(task);
                     _db.SaveChanges();
 
-                    return RedirectToAction("Index", new { date = task.DateTime });
+                    return RedirectToAction("Index", new { date = task.DateTime.Date });
             }
                 catch
                 {
@@ -87,17 +92,20 @@ namespace todoList.Controllers
             }
 
         // GET: TaskController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return HttpNotFound();
             }
-            Models.Task task = _db.Tasks.Find(id);
+            Models.Task? task = _db.Tasks.Find(id);
             var priorityList = _db.Priorities.ToList();
-            var vm = new TaskPriorityViewModel();
-            vm.Task = task;
-            vm.Priorities = priorityList;
+            var vm = new TaskPriorityViewModel()
+            {
+                Task = task,
+                Priorities = priorityList
+
+            };
             if (task == null)
             {
                 return HttpNotFound();
@@ -122,21 +130,23 @@ namespace todoList.Controllers
             _db.Entry(vm).State = EntityState.Modified;
             _db.SaveChanges();
 
-            return RedirectToAction("Index", new { date = vm.DateTime });
+            return RedirectToAction("Index", new { date = vm.DateTime.Date });
         }
 
         // GET: TaskController/Delete/5
-        public ActionResult Delete(int id)
+        public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return HttpNotFound();
             }
-            Models.Task task = _db.Tasks.Find(id);
+            Models.Task? task = _db.Tasks.Find(id);
             var priority = _db.Priorities.Find(task.PriorityId);
-            var vm = new TaskPriorityViewModel();
-            vm.Task = task;
-            vm.Priority = priority;
+            var vm = new TaskPriorityViewModel()
+            {
+                Task = task,
+                Priority = priority
+            };
             if (task == null)
             {
                 return HttpNotFound();
@@ -154,7 +164,7 @@ namespace todoList.Controllers
                 Models.Task task = _db.Tasks.Find(id);
                 _db.Tasks.Remove(task);
                 _db.SaveChanges();
-                return RedirectToAction("Index", new { date = task.DateTime });
+                return RedirectToAction("Index", new { date = task.DateTime.Date });
             }
             catch
             {

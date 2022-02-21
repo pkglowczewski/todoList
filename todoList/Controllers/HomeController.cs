@@ -9,43 +9,32 @@ namespace todoList.Controllers
 {  [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _db;
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext db)
+        public HomeController(ApplicationDbContext db)
         {
-            _logger = logger;
             _db = db;
         }
 
         public IActionResult Index()
         {
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var list = new List<Models.Task>();
-            var PriorityList = _db.Priorities.ToList();
+            var tasksList = new List<Models.Task>();
+            var priorityList = _db.Priorities.ToList();
             DateTime date = DateTime.Now;
-            for (int i = 1; i <= PriorityList.Count; i++)
+            foreach (var priority in priorityList)
             {
-                var item = _db.Tasks.Select(e => e).Where(e => e.UserId == userId && e.PriorityId == i && e.DateTime > date).OrderBy(e => e.DateTime).Take(3);
-                var itemlist = item;
-                if (itemlist != null)
-                {
-                    foreach (var itemL in itemlist)
-                    {
-                        list.Add(itemL);
-                    }
-                }
+                var items = _db.Tasks.Where(e => e.UserId == userId && e.PriorityId == priority.PriorityId && e.DateTime > date)
+                    .OrderBy(e => e.DateTime).Take(3).ToList();
+
+                tasksList.AddRange(items);
             }
-            var vm = new TaskPriorityViewModel();
-            vm.Tasks = list;
-            vm.Priorities = PriorityList;
+            var vm = new TaskPriorityViewModel()
+            {
+                Tasks = tasksList,
+                Priorities = priorityList
+            };
             return View(vm);
         }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
