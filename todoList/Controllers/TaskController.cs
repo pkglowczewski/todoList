@@ -24,7 +24,7 @@ namespace todoList.Controllers
             {
                 date = DateTime.Today;
             }
-           
+
             DateTime dateAddDay = date.AddDays(1);
 
             var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -70,30 +70,32 @@ namespace todoList.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(TaskPriorityViewModel model)
         {
-                try
-                {
-                    var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                    model.Task.UserId = userId;
-                    _db.Tasks.Add(model.Task);
-                    _db.SaveChanges();
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                model.Task.UserId = userId;
+                _db.Tasks.Add(model.Task);
+                _db.SaveChanges();
 
-                    return RedirectToAction("Index", new { date = model.Task.DateTime.Date });
+                return RedirectToAction("Index", new { date = model.Task.DateTime.Date });
+
             }
-                catch
-                {
-                    throw;
-                }
-            }
+            return View(model);
+        }
 
         // GET: TaskController/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
-            Models.Task? task = _db.Tasks.Find(id);
+            Models.Task? task = _db.Tasks.FirstOrDefault(x => x.TaskId == id);
+            if (task == null)
+            {
+                return NotFound();
+            }
             var priorityList = _db.Priorities.ToList();
             var vm = new TaskPriorityViewModel()
             {
@@ -101,18 +103,10 @@ namespace todoList.Controllers
                 Priorities = priorityList
 
             };
-            if (task == null)
-            {
-                return HttpNotFound();
-            }
+
             return View(vm);
         }
 
-        private ActionResult HttpNotFound()
-        {
-            throw new NotImplementedException();
-        }
-    
 
         // POST: TaskController/Edit/5
         [HttpPost]
@@ -133,19 +127,20 @@ namespace todoList.Controllers
         {
             if (id == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
-            Models.Task? task = _db.Tasks.Find(id);
-            var priority = _db.Priorities.Find(task.PriorityId);
+            Models.Task? task = _db.Tasks.FirstOrDefault(x => x.TaskId == id);
+            if (task == null)
+            {
+                return NotFound();
+            }
+            var priority = _db.Priorities.FirstOrDefault(x => x.PriorityId == task.PriorityId);
             var vm = new TaskPriorityViewModel()
             {
                 Task = task,
                 Priority = priority
             };
-            if (task == null)
-            {
-                return HttpNotFound();
-            }
+
             return View(vm);
         }
 
@@ -154,17 +149,15 @@ namespace todoList.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
-            try
+            Models.Task? task = _db.Tasks.FirstOrDefault(x => x.TaskId == id);
+            if (task == null)
             {
-                Models.Task task = _db.Tasks.Find(id);
-                _db.Tasks.Remove(task);
-                _db.SaveChanges();
-                return RedirectToAction("Index", new { date = task.DateTime.Date });
+                return NotFound();
             }
-            catch
-            {
-                return View();
-            }
+            _db.Tasks.Remove(task);
+            _db.SaveChanges();
+            return RedirectToAction("Index", new { date = task.DateTime.Date });
+
         }
     }
 }
